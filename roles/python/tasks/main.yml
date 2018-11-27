@@ -6,6 +6,7 @@
     name: "{{ item }}"
   with_items:
     - python-pip
+    - python-psycopg2
   tags:
     - python
 
