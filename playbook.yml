@@ -39,3 +39,4 @@
     - python
     - database
     - deploy
+    - uwsgi
