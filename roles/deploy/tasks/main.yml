@@ -1,0 +1,97 @@
+---
+
+- name: Create project directory
+  become: true
+  file:
+    path: "{{ app_root_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    recurse: true
+  tags:
+    - deploy
+
+- name: Checkout git repository
+  git:
+    repo: https://github.com/PYerevan/ansible-application.git
+    dest: "{{ app_root_dir }}"
+    version: "master"
+    accept_hostkey: yes
+    force: yes
+  tags:
+    - deploy
+
+- name: Create logs directory
+  become: true
+  file:
+    path: "{{ app_log_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    recurse: true
+  tags:
+    - deploy
+
+- name: Create run directory
+  become: true
+  file:
+    path: "{{ app_run_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    recurse: true
+  tags:
+    - deploy
+
+- name: Install PIP dependencies
+  pip:
+    virtualenv: "{{ app_venv_dir }}"
+    virtualenv_python: python3.6
+    requirements: "{{ app_root_dir }}/requirements.txt"
+  args:
+    chdir: "{{ app_root_dir }}"
+  tags:
+    - deploy
+
+- name: Register .env file existence variable
+  stat: path="{{ app_root_dir }}/.env"
+  register: dotenv_stat
+  tags:
+    - deploy
+
+- name: Copy dotenv file
+  command: "cp {{ app_root_dir }}/.env.dist {{ app_root_dir }}/.env"
+  when: dotenv_stat.stat.exists == false
+  tags:
+    - deploy
+
+- name: Prepare .env file
+  lineinfile:
+    dest: "{{ app_root_dir }}/.env"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: 'APP_SECRET_KEY=', line: 'APP_SECRET_KEY={{ app_secret_key }}' }
+    - { regexp: 'APP_DB_NAME=', line: 'APP_DB_NAME={{ app_db_name }}' }
+    - { regexp: 'APP_DB_USER=', line: 'APP_DB_USER={{ app_db_user }}' }
+    - { regexp: 'APP_DB_PASSWORD=', line: 'APP_DB_PASSWORD={{ app_db_password }}' }
+  tags:
+    - deploy
+
+- name: Execute migrations
+  command: "{{ app_venv_dir }}/bin/python manage.py migrate"
+  register: db_migrations_result
+  changed_when: "db_migrations_result.stdout is not search('No migrations to apply')"
+  args:
+    chdir: "{{ app_root_dir }}"
+  tags:
+    - deploy
+
+- name: Collect static files
+  command: "{{ app_venv_dir }}/bin/python manage.py collectstatic --no-input"
+  register: collectstatic_result
+  changed_when: "collectstatic_result.stdout is not search('0 static files copied')"
+  args:
+    chdir: "{{ app_root_dir }}"
+  tags:
+    - deploy
