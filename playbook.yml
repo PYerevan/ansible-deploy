@@ -4,3 +4,30 @@
   become_user: root
   become_method: sudo
   gather_facts: no
+
+  pre_tasks:
+
+    - name: Install python2 for ansible
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+
+    - name: Update APT cache
+      become: true
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+
+    - name: Upgrade installed packages
+      become: true
+      apt:
+        upgrade: safe
+        force_apt_get: true
+
+    - name: Install low level utilities
+      become: true
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - zip
+        - unzip
