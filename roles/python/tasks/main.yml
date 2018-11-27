@@ -1,0 +1,17 @@
+---
+
+- name: Install reuired system packages
+  become: true
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - python-pip
+  tags:
+    - python
+
+- name: Install PIP packages
+  become: true
+  pip:
+    name: virtualenv
+  tags:
+    - python

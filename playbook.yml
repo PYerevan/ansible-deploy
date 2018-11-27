@@ -31,3 +31,6 @@
       with_items:
         - zip
         - unzip
+
+  roles:
+    - python
