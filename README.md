@@ -14,15 +14,11 @@ Required steps for using the repository
 
 Edit vault file
 
-```ansible-vault edit vars/vault.yml --vault-password-file vault-password.txt
-
-Edit vault file
-
 ```ansible-vault edit vars/vault.yml --vault-password-file vault-password.txt```
 
 Deploy
 
-```ansible-playbook playbook.yml -i hosts.ini -l prod -t deploy```
+```ansible-playbook playbook.yml -i hosts.ini -l prod -t deploy --vault-password-file vault-password.txt```
 
 Run all recipes
 
