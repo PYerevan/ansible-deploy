@@ -4,17 +4,7 @@
 # Application directories, useful paths and variables
 ########################################################################################################################
 
-app_secret_key: "super-secret-prod-key"
-
 app_root_dir: /var/www/html/app
 app_venv_dir: "{{ app_root_dir }}/venv"
 app_log_dir: "{{ app_root_dir }}/log"
 app_run_dir: "{{ app_root_dir }}/run"
-
-########################################################################################################################
-# Database
-########################################################################################################################
-
-app_db_name: "pyerevan"
-app_db_user: "pyerevan"
-app_db_password: "secret"
