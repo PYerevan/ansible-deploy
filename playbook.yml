@@ -40,3 +40,4 @@
     - database
     - deploy
     - uwsgi
+    - nginx
